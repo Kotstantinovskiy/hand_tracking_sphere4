@@ -13,7 +13,7 @@ NEW_DIR = "./new_labeles/"
 labeles = set()
 file = open("labeles.csv", "r")
 for line in file:
-    labeles.add(line.split("\t")[0])
+    labeles.add(line.split("\t")[1])
 
 labeles = list(labeles)
 print(len(labeles))
