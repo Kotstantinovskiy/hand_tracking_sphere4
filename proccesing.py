@@ -7,8 +7,8 @@ from hand_tracker import HandTracker
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
-LANDMARK_MODEL_PATH = "./hand_landmark.tflite"
-#LANDMARK_MODEL_PATH = "./hand_landmark_3d.tflite"
+#LANDMARK_MODEL_PATH = "./hand_landmark.tflite"
+LANDMARK_MODEL_PATH = "./hand_landmark_3d.tflite"
 ANCHORS_PATH = "./anchors.csv"
 PATH = "./new_lables/"
 

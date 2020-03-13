@@ -78,8 +78,8 @@ class HandTracker():
         self.interp_joint.invoke()
 
         joints = self.interp_joint.get_tensor(self.out_idx_joint)
-        return joints.reshape(-1,2)
-        #return joints.reshape(-1, 3)
+        #return joints.reshape(-1,2)
+        return joints.reshape(-1, 3)
 
     def detect_hand(self, img_norm):
         """

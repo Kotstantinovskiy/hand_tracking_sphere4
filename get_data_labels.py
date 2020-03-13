@@ -4,6 +4,9 @@ from shutil import copytree
 STOP_SIGN = "Stop Sign"
 SWIPING_LEFT = "Swiping Left"
 SWIPING_RIGHT = "Swiping Right"
+SWIPING_DOWN = "Swiping Down"
+SWIPING_UP = "Swiping Up"
+THUMB_UP = "Thumb Up"
 DIR = "./20bn-jester-v1/"
 NEW_DIR = "./new_lables/"
 
