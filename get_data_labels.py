@@ -7,13 +7,13 @@ SWIPING_RIGHT = "Swiping Right"
 SWIPING_DOWN = "Swiping Down"
 SWIPING_UP = "Swiping Up"
 THUMB_UP = "Thumb Up"
-DIR = "./20bn-jester-v1/"
+DIR = "20bn-jester-v1/"
 NEW_DIR = "./new_labeles/"
 
 labeles = set()
 file = open("labeles.csv", "r")
 for line in file:
-    labeles.add(line.split("\t")[1])
+    labeles.add(line.split("\t")[0])
 
 labeles = list(labeles)
 print(len(labeles))
