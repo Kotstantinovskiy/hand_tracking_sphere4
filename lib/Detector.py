@@ -34,7 +34,7 @@ class Detector:
                 g = gesture.data(i, i+self.window)
                 X.append(g.reshape(1, -1))
 
-                if i + self.window == len(gesture):
+                if i + self.window - len(gesture) == 0:
                     if gesture.label == "No gesture":
                         y.append(0)
                     else:
