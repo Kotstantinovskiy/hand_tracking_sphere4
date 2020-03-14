@@ -19,6 +19,7 @@ class Classifier:
 
             X[i, :] = gest.data(-32)
             y[i] = gest.label
+            print('%d/%d' % (i, len(data)), end='\r')
 
         print ("INFO: Made %s samples." % X.shape[0])
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
@@ -39,4 +40,3 @@ class Classifier:
     def dump():
         self.model.save_model("classifier.ctbst")
         print("INFO: Model was dumped.")
-
