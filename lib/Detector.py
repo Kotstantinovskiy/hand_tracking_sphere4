@@ -34,16 +34,14 @@ class Detector:
             for i in range(len(gesture)):
                 if i + self.window > len(gesture):
                     break
+                g = gesture.data(i, i+self.window)
+                X.append(g.reshape(1, -1))
 
-                for g in gesture.data(i, i + self.window):
-
-                    X.append(g.reshape(1, -1))
-
-                    if i+self.window == len(gesture)-1:
-                        y.append(1)
-                    else:
-                        y.append(0)
-            print('%d/%d' % (j. len(gestures)), end='\r')
+                if i + self.window == len(gesture) - 1:
+                    y.append(1)
+                else:
+                    y.append(0)
+            print('%d/%d' % (j, len(gestures)), end='\r')
 
         X = np.concatenate(X, axis=0)
         y = np.array(y)
