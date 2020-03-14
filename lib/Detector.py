@@ -18,8 +18,7 @@ class Detector:
 
         self.window = window
 
-    def train(self, gestures, valid=False):
-
+    def train(self, gestures):
         ## processing data
         print("Start processing data")
         X = list()
@@ -38,7 +37,10 @@ class Detector:
                 X.append(g.reshape(1, -1))
 
                 if i + self.window == len(gesture) - 1:
-                    y.append(1)
+                    if gesture.label == "No gesture":
+                        y.append(0)
+                    else:
+                        y.append(1)
                 else:
                     y.append(0)
             print('%d/%d' % (j, len(gestures)), end='\r')
