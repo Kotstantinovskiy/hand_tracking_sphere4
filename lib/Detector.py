@@ -27,7 +27,7 @@ class Detector:
             if len(gesture) < self.window:
                 continue
 
-            for g in gesture.slice(i, i+self.window):
+            for g in gesture.data(i, i+self.window):
                 X_train.append(g)
                 if i+window == len(gestures)-1:
                     y_train.append(1)
