@@ -55,6 +55,8 @@ class Detector:
         elif self.type_model == "logistic_regression":
             self.detector.fit(X_train, y_train)
 
+        return X_train, X_test, y_train, y_test
+
     def predict(self, x):
         return self.detector.predict(x)
 
