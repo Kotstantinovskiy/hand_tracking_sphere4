@@ -31,7 +31,7 @@ class Detector:
                 continue
 
             for i in range(len(gesture)):
-                if i+self.window > len(gesture):
+                if i + self.window > len(gesture):
                     break
 
                 g = gesture.data(i, i+self.window)
