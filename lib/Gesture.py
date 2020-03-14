@@ -12,6 +12,9 @@ class Gesture:
         for l in range(63, len(landmarks)+1, 63):
             self._data.append(np.array(landmarks[l-63:l]))
 
+    def __len__(self):
+	return len(self._data)
+
     def slice(self, i, j):
         assert i >= 0 and i < len(self._data), "Bad i"
         assert j > i and j < len(self._data), "Bad j"
