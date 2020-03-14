@@ -1,4 +1,4 @@
-from catboost import CatBoostRegressor
+import lightgbm as lgb
 
 import numpy as np
 
@@ -20,8 +20,10 @@ class Classifier:
             y[i] = gest.label
 
         print ("INFO: Made %s samples." % X.shape[0])
-
-        self.model.fit(X, y)
+        train_data = lgb.Dataset(X, label=y)
+        param = {'num_leaves': 31, 'objective': 'binary'}
+        param['metric'] = 'auc'
+        self.model = bst = lgb.train(params, train_data)
 
     def predict(queue):
         X = np.array(queue).reshape(1, -1)
@@ -31,7 +33,7 @@ class Classifier:
         self.model.load_model("classifier.ctbst")
         print("INFO: Model was loaded.")
 
-    def dumpt():
+    def dump():
         self.model.save_model("classifier.ctbst")
         print("INFO: Model was dumped.")
 
