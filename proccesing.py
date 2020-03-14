@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 import os
 from hand_tracker import HandTracker
+import time
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
@@ -27,6 +28,7 @@ for line in labeles:
 
 output_file = open("output.txt", "w")
 for name_dir in os.listdir(PATH):
+    t1 = time.time()
 
     output_file.write(name_dir + "\t" + labeles[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
 
@@ -39,3 +41,5 @@ for name_dir in os.listdir(PATH):
                 output_file.write(str(p[0]) + " " + str(p[1]) + " ")
 
     output_file.write("\n")
+    t2 = time.time()
+    print('%s done (%d)' % (name_dir, t2 - t1), end='\r')
