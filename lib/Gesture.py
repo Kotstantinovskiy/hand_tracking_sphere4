@@ -7,6 +7,10 @@ class Gesture:
     def __init__(self, frames=list()):
         self._data = frames
 
+        norm = {
+        "no_normalization" : no_normalization
+        }
+
     def parse_line(self, line):
         splited = line.split("\t")
         self.label = splited[1]
