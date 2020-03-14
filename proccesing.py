@@ -5,6 +5,7 @@ import tensorflow as tf
 import os
 from hand_tracker import HandTracker
 import time
+from multiprocessing import Pool
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
@@ -26,20 +27,23 @@ labeles_file = open("labeles.csv", "r")
 for line in labeles_file:
     labeles[line.split("\t")[0]] = line.split("\t")[1].strip()
 
-output_file = open("output.txt", "w")
-for name_dir in os.listdir(PATH):
+def process_dir(args):
     t1 = time.time()
+    num_dir, name_dir = args
+    with open("./outputs/output%d.txt" % num_dir, "w") as output_file:
+        output_file.write(name_dir + "\t" + labeles[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
 
-    output_file.write(name_dir + "\t" + labeles[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
+        for name_file in os.listdir(PATH + name_dir):
+            image = cv2.imread(PATH + name_dir + "/" + name_file, flags=cv2.IMREAD_COLOR)
+            points, bbox = detector(image)
 
-    for name_file in os.listdir(PATH + name_dir):
-        image = cv2.imread(PATH + name_dir + "/" + name_file, flags=cv2.IMREAD_COLOR)
-        points, bbox = detector(image)
+            if points is not None:
+                for p in points:
+                    output_file.write(str(p[0]) + " " + str(p[1]) + " ")
 
-        if points is not None:
-            for p in points:
-                output_file.write(str(p[0]) + " " + str(p[1]) + " ")
+        output_file.write("\n")
+    print('%d (%d)' % (num_dir, time.time() - t1))
 
-    output_file.write("\n")
-    t2 = time.time()
-    print('%s done (%d)' % (name_dir, t2 - t1))
+dirs = list(enumerate(os.listdir(PATH)))
+p = Pool(36)
+p.map(process_dir, dirs)
