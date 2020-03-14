@@ -14,12 +14,9 @@ class Gesture:
         assert len(landmarks) % 42 == 0, "Bad gesture shape"
         for l in range(42, len(landmarks)+1, 42):
             self._data.append(np.array(landmarks[l-42:l]))
-<<<<<<< HEAD
-=======
 
     def __len__(self):
         return len(self._data)
->>>>>>> d28bd38a213b1160ba1f242c7600faba92770492
 
     def slice(self, i, j):
         assert i >= 0 and i < len(self._data), "Bad i"
