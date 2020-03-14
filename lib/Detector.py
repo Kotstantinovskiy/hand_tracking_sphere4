@@ -23,18 +23,25 @@ class Detector:
         X_train = list()
         y_train = list()
 
-        for i, gesture in enumerate(gestures):
+        for gesture in gestures:
+
             if len(gesture) < self.window:
                 continue
 
-            for g in gesture.data(i, i+self.window):
-                X_train.append(g)
-                if i+window == len(gestures)-1:
-                    y_train.append(1)
-                else:
-                    y_train.append(0)
+            for i in range(len(gesture)):
+                if i+self.window > len(gesture):
+                    break
 
-        X_train = numpy.concatenate(X_train, axis=0)
+                for g in gesture.data(i, i+self.window):
+
+                    X_train.append(g)
+                    
+                    if i+self.window == len(gesture)-1:
+                        y_train.append(1)
+                    else:
+                        y_train.append(0)
+
+        X_train = np.concatenate(X_train, axis=0)
         y_train = np.array(y_train)
 
         ##train Catboost
