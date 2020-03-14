@@ -8,9 +8,9 @@ class Gesture:
 
         landmarks = list(map(float, splited[3].split(" ")))
 
-        assert len(landmarks) % 63 == 0, "Bad gesture shape"
-        for l in range(63, len(landmarks)+1, 63):
-            self._data.append(np.array(landmarks[l-63:l]))
+        assert len(landmarks) % 42 == 0, "Bad gesture shape"
+        for l in range(42, len(landmarks)+1, 42):
+            self._data.append(np.array(landmarks[l-42:l]))
 
     def slice(self, i, j):
         assert i >= 0 and i < len(self._data), "Bad i"
