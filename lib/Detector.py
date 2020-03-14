@@ -26,7 +26,7 @@ class Detector:
         X = list()
         y = list()
 
-        for gesture in gestures:
+        for j, gesture in enumerate(gestures):
 
             if len(gesture) < self.window:
                 continue
@@ -43,6 +43,7 @@ class Detector:
                         y.append(1)
                     else:
                         y.append(0)
+            print('%d/%d' % (j. len(gestures)), end='\r')
 
         X = np.concatenate(X, axis=0)
         y = np.array(y)
@@ -52,7 +53,7 @@ class Detector:
         X_test_lgb = lgb.Dataset(X_test, label=y_test)
 
         ##train Catboost
-        print("Start train model")
+        print("Start train model on %d samples" % X.shape[0])
         if self.type_model == "catboost":
             #elf.detector.fit(X_train, y_train, eval_set=(X_test, y_test))
             params = {'num_leaves': 16, 'objective': 'binary', 'metric': 'auc'}
