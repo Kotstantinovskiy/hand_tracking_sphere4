@@ -9,7 +9,9 @@ class Classifier:
     def train(self, data):
         X = np.empty((len(data), 32 * 42))
         for i, gest in enumerate(data):
+
             if len(gest) < 17:
                 continue
             if len(gest) < 32:
                 gest = pretty_gest(gest, 32)
+

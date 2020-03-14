@@ -1,5 +1,6 @@
 import cv2
 from hand_tracker import HandTracker
+from lib.Model import Model
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
@@ -48,6 +49,8 @@ detector = HandTracker(
     box_enlarge=1.3
 )
 
+mdl = Model(8, 32)
+
 while hasFrame:
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     points, _ = detector(image)
@@ -59,6 +62,12 @@ while hasFrame:
             x0, y0 = points[connection[0]]
             x1, y1 = points[connection[1]]
             cv2.line(frame, (int(x0), int(y0)), (int(x1), int(y1)), CONNECTION_COLOR, THICKNESS)
+        landmarks_vec = []
+        for point in points:
+            landmarks_vec += [point[0], point[1]]
+        predicted_gesture = mdl(landmarks_vec)
+        if predicted_gesture:
+            print(predicted_gesture)
     cv2.imshow(WINDOW, frame)
     hasFrame, frame = capture.read()
     key = cv2.waitKey(20)
