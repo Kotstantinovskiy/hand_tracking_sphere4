@@ -11,7 +11,7 @@ PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
 #LANDMARK_MODEL_PATH = "./hand_landmark.tflite"
 LANDMARK_MODEL_PATH = "./hand_landmark_3d.tflite"
 ANCHORS_PATH = "./anchors.csv"
-PATH = "./new_labeles/"
+PATH = "./data/"
 
 detector = HandTracker(
     PALM_MODEL_PATH,
@@ -22,8 +22,8 @@ detector = HandTracker(
 )
 
 labeles = {}
-labeles_file = open("labeles.csv", "w")
-for line in labeles:
+labeles_file = open("labeles.csv", "r")
+for line in labeles_file:
     labeles[line.split("\t")[0]] = line.split("\t")[1]
 
 output_file = open("output.txt", "w")
@@ -42,4 +42,4 @@ for name_dir in os.listdir(PATH):
 
     output_file.write("\n")
     t2 = time.time()
-    print('%s done (%d)' % (name_dir, t2 - t1), end='\r')
+    print('%s done (%d)' % (name_dir, t2 - t1))
