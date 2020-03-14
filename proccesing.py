@@ -24,7 +24,7 @@ detector = HandTracker(
 labeles = {}
 labeles_file = open("labeles.csv", "r")
 for line in labeles_file:
-    labeles[line.split("\t")[0]] = line.split("\t")[1]
+    labeles[line.split("\t")[0]] = line.split("\t")[1].strip()
 
 output_file = open("output.txt", "w")
 for name_dir in os.listdir(PATH):
