@@ -3,12 +3,24 @@ import numpy as np
 def no_normalization(subdata):
     return subdata
 
+def norm_with_bug(subdata):
+    zero_min = np.min(subdata[0])
+    zero_std = np.max(subdata[0]) - zero_min
+    subdata[0] -= zero_min
+    subdata[0] /= zero_std
+    for i, vec in enumerate(subdata):
+        if i == 0:
+            continue
+        subdata[i] = (vec - subdata[i - 1]) / zero_std
+    return subdata
+
 class Gesture:
     def __init__(self, frames=list()):
         self._data = frames
 
         self.norm_dict = {
-        "no_normalization" : no_normalization
+        "no_normalization" : no_normalization,
+        "bug" : norm_with_bug
         }
 
     def parse_line(self, line):
@@ -25,7 +37,7 @@ class Gesture:
     def __len__(self):
         return len(self._data)
 
-    def data(self, i=None, j=None, norm_name = "no_normalization"):
+    def data(self, i=None, j=None, norm_name = "bug"):
         norm = self.norm_dict.get(norm_name)
         if norm is None:
             print("ERROR: bad normalization name.")
