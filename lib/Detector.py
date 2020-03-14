@@ -1,11 +1,9 @@
 from catboost import CatBoostClassifier, Pool
-import lightgbm as lgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import numpy as np
 
 class Detector:
-
     def __init__(self, window=8, iterations=800, lr=0.1, depth=8, type_model="catboost"):
         self.type_model = type_model
         if type_model == "catboost":
