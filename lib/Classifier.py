@@ -1,5 +1,5 @@
 from catboost import CatBoostRegressor
-from uril
+
 import numpy as np
 
 class Classifier:
@@ -9,7 +9,6 @@ class Classifier:
     def train(self, data):
         X = np.empty((len(data), 32 * 42))
         for i, gest in enumerate(data):
-
             if len(gest) < 17:
                 continue
             if len(gest) < 32:
@@ -18,5 +17,19 @@ class Classifier:
             X[i, :] = gest.data(-32)
             y[i] = gest.label
 
-        print (len())
+        print ("INFO: Made %s samples." % X.shape[0])
+
+        self.model.fit(X, y)
+
+    def predict(queue):
+        X = np.array(queue).reshape(1, -1)
+        return self.model.predict(queue)
+
+    def load():
+        self.model.load_model("classifier.ctbst")
+        print("INFO: Model was loaded.")
+
+    def dumpt():
+        self.model.save_model("classifier.ctbst")
+        print("INFO: Model was dumped.")
 
