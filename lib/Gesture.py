@@ -18,10 +18,14 @@ class Gesture:
     def __len__(self):
         return len(self._data)
 
-    def slice(self, i, j):
-        assert i >= 0 and i < len(self._data), "Bad i"
-        assert j > i and j < len(self._data), "Bad j"
-        subdata = self._data[i:j]
+    def data(self, i=None, j=None):
+        assert i != None or j != None, "Bad slice"
+        if i != None and j != None:
+            subdata = self._data[i:j]
+        elif i == None:
+            subdata = self._data[:j]
+        else:
+            subdata = self._data[i:]
         zero_min = np.min(subdata[0])
         zero_std = np.max(subdata[0]) - zero_min
         subdata[0] -= zero_min
@@ -30,8 +34,11 @@ class Gesture:
             if i == 0:
                 continue
             subdata[i] = (vec - subdata[i - 1]) / zero_std
-        return subdata
+        return np.array(subdata).flatten()
 
     def push(self, frame):
         assert len(frame) == 42, "Bad frame shape"
         self._data += [np.array(frame)]
+
+    def drop_first(self):
+        self._data = self._data[1:]
