@@ -1,14 +1,15 @@
-from catboost import CatBoostClassifier
+from Classifier import Classifier
+from Detector import Detector
 from Gesture import Gesture
 
 class Model(object):
     def __init__(self, detector_window, classifier_window):
         self.detector_window = detector_window
         self.classifier_window = classifier_window
-        self.detector = CatBoostClassifier()
-        self.detector.load('./models/catboost/detector.pkl')
-        self.classifier = CatBoostClassifier()
-        self.classifier.load('./models/catboost/classifier.pkl')
+        self.detector = Detector()
+        self.detector.load()
+        self.classifier = Classifier()
+        self.classifier.load()
         self.gesture_sequence = Gesture()
 
     def __call__(self, hand_landmarks):
