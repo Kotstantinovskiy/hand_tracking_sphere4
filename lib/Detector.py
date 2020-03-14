@@ -34,8 +34,8 @@ class Detector:
 
                 for g in gesture.data(i, i+self.window):
 
-                    X_train.append(g)
-                    
+                    X_train.append(g.reshape(1, -1))
+
                     if i+self.window == len(gesture)-1:
                         y_train.append(1)
                     else:
