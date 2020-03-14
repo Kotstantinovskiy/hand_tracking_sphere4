@@ -2,6 +2,7 @@ import csv
 import cv2
 import numpy as np
 import tensorflow as tf
+from scipy.special import expit as sigmoid
 
 class HandTracker():
 
@@ -67,7 +68,8 @@ class HandTracker():
 
     @staticmethod
     def _sigm(x):
-        return 1 / (1 + np.exp(-x))
+        return sigmoid(x)
+        #return 1 / (1 + np.exp(-x))
 
     @staticmethod
     def _pad1(x):
