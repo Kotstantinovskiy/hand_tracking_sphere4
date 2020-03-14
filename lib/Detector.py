@@ -32,10 +32,10 @@ class Detector:
                 continue
 
             for i in range(len(gesture)):
-                if i+self.window > len(gesture):
+                if i + self.window > len(gesture):
                     break
 
-                for g in gesture.data(i, i+self.window):
+                for g in gesture.data(i, i + self.window):
 
                     X.append(g.reshape(1, -1))
 
