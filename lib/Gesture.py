@@ -26,14 +26,22 @@ class Gesture:
             subdata = self._data[:j]
         else:
             subdata = self._data[i:]
-        zero_min = np.min(subdata[0])
-        zero_std = np.max(subdata[0]) - zero_min
-        subdata[0] -= zero_min
-        subdata[0] /= zero_std
+        zero_min_x = np.min(subdata[0][::2])
+        zero_min_y = np.min(subdata[0][1::2])
+        zero_std_x = np.max(subdata[0][::2]) - zero_min_x
+        zero_std_y = np.max(subdata[0][1::2]) - zero_min_y
+        subdata[0][::2] -= zero_min_x
+        subdata[0][::2] /= zero_std_x
+        subdata[0][1::2] -= zero_min_y
+        subdata[0][1::2] /= zero_std_y
+        tmp = None
         for i, vec in enumerate(subdata):
             if i == 0:
+                tmp = subdata[i][:]
                 continue
-            subdata[i] = (vec - subdata[i - 1]) / zero_std
+            subdata[i][::2] = (vec[::2] - tmp[::2]) / zero_std_x
+            subdata[i][1::2] = (vec[1::2] - tmp[1::2]) / zero_std_y
+            tmp = subdata[i][:]
         return np.array(subdata).flatten()
 
     def push(self, frame):
