@@ -9,7 +9,7 @@ class Gesture:
         self.label = splited[1]
         self._data = list()
 
-        landmarks = list(map(float, splited[3].split(" ")))
+        landmarks = list(map(float, splited[3].split(" ")[:-1]))
 
         assert len(landmarks) % 42 == 0, "Bad gesture shape"
         for l in range(42, len(landmarks)+1, 42):
