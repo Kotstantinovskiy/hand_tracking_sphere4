@@ -1,5 +1,8 @@
 import numpy as np
 
+def no_normalization(subdata):
+    return subdata
+
 class Gesture:
     def __init__(self, frames=list()):
         self._data = frames
@@ -18,7 +21,10 @@ class Gesture:
     def __len__(self):
         return len(self._data)
 
-    def data(self, i=None, j=None):
+    def data(self, i=None, j=None, norm_name = "no_normalization"):
+        norm = norm_dict.get(norm_name)
+        if norm is None:
+            print("ERROR: bad normalization name.")
         assert i != None or j != None, "Bad slice"
         if i != None and j != None:
             subdata = self._data[i:j]
@@ -26,6 +32,7 @@ class Gesture:
             subdata = self._data[:j]
         else:
             subdata = self._data[i:]
+        subdata = norm(subdata)
         first_frame = subdata[0]
         for i, vec in enumerate(subdata):
             if i == 0:
