@@ -4,13 +4,14 @@ import numpy as np
 import tensorflow as tf
 import os
 from hand_tracker import HandTracker
+import time
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
 #LANDMARK_MODEL_PATH = "./hand_landmark.tflite"
 LANDMARK_MODEL_PATH = "./hand_landmark_3d.tflite"
 ANCHORS_PATH = "./anchors.csv"
-PATH = "./new_lables/"
+PATH = "./data/"
 
 detector = HandTracker(
     PALM_MODEL_PATH,
@@ -20,15 +21,16 @@ detector = HandTracker(
     box_enlarge=1.3
 )
 
-lables = {}
-lables_file = open("lables.csv", "w")
-for line in lables:
-    lables[line.split("\t")[0]] = line.split("\t")[1]
+labeles = {}
+labeles_file = open("labeles.csv", "r")
+for line in labeles_file:
+    labeles[line.split("\t")[0]] = line.split("\t")[1]
 
 output_file = open("output.txt", "w")
 for name_dir in os.listdir(PATH):
+    t1 = time.time()
 
-    output_file.write(name_dir + "\t" + lables[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
+    output_file.write(name_dir + "\t" + labeles[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
 
     for name_file in os.listdir(PATH + name_dir):
         image = cv2.imread(PATH + name_dir + "/" + name_file, flags=cv2.IMREAD_COLOR)
@@ -39,3 +41,5 @@ for name_dir in os.listdir(PATH):
                 output_file.write(str(p[0]) + " " + str(p[1]) + " ")
 
     output_file.write("\n")
+    t2 = time.time()
+    print('%s done (%d)' % (name_dir, t2 - t1))
