@@ -28,10 +28,10 @@ class Classifier:
 
         self.model.fit(X_train, y_train, eval_set=Pool(X_val, y_val))
 
-    def predict(self, queue):
-        return self.model.predict(np.array(queue).reshape(1, -1))
+    def predict(self, queue, *args, **kwargs):
+        return self.model.predict(np.array(queue).reshape(1, -1),  *args, **kwargs)
 
-    def load(self,):
+    def load(self):
         self.model.load_model("classifier.ctbst")
         print("INFO: Model was loaded.")
 
