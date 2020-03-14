@@ -7,7 +7,9 @@ class Classifier:
         self.model = CatBoostRegressor()
 
     def train(self, data):
-        X = np.empty((len(data), 32 * 42))
+        sample_size = len(data)
+        X = np.empty((sample_size, 32 * 42))
+        y = np.empty((1, sample_size)
         for i, gest in enumerate(data):
             if len(gest) < 17:
                 continue
