@@ -42,3 +42,22 @@ class Gesture:
 
     def drop_first(self):
         self._data = self._data[1:]
+
+    def pretty(self, asking_size):
+        deter = asking_size - len(self)
+        original_mask = [2 * i for i in range(len(self))]
+        fake_mask = list(np.random.choice([2 * i + 1 for i in range(len(self) - 1)], deter, False))
+        answer = []
+        n = 0
+        for i in range(2 * len(self)):
+            if i in original_mask:
+                answer.append(self._data[i / 2])
+                n += 1
+            if i in fake_mask:
+                answer.append((self._data[(i - 1) / 2] - self._data[(i + 1) / 2]) / 2)
+                n += 1
+        if n != asking_size:
+            print("ERROR: bug in pretty function")
+
+        self._data = answer
+
