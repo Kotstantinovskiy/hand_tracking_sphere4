@@ -10,12 +10,12 @@ class Gesture:
 
         assert len(landmarks) % 63 == 0, "Bad gesture shape"
         for l in range(63, len(landmarks)+1, 63):
-            self.data.append(np.array(landmarks[l-63:l]))
+            self._data.append(np.array(landmarks[l-63:l]))
 
-    def data(i, j):
+    def slice(self, i, j):
         assert i >= 0 and i < len(self._data), "Bad i"
         assert j > i and j < len(self._data), "Bad j"
-        subdata = self.data[i:j]
+        subdata = self._data[i:j]
         zero_min = np.min(subdata[0])
         zero_std = np.max(subdata[0]) - zero_min
         subdata[0] -= zero_min
