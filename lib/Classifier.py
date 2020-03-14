@@ -13,5 +13,10 @@ class Classifier:
             if len(gest) < 17:
                 continue
             if len(gest) < 32:
-                gest = pretty_gest(gest, 32)
+                gest.pretty(32)
+
+            X[i, :] = gest.data(-32)
+            y[i] = gest.label
+
+        print (len())
 
