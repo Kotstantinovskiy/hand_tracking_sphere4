@@ -1,9 +1,11 @@
 import numpy as np
 
-def no_normalization(subdata):
+
+def norm_0(subdata):
     return subdata
 
-def norm_with_bug(subdata):
+
+def norm_bug(subdata):
     zero_min = np.min(subdata[0])
     zero_std = np.max(subdata[0]) - zero_min
     subdata[0] -= zero_min
@@ -14,13 +16,63 @@ def norm_with_bug(subdata):
         subdata[i] = (vec - subdata[i - 1]) / zero_std
     return subdata
 
+
+def norm_1(subdata):
+    first_vec = subdata[0]
+    for i, vec in enumerate(subdata):
+        if i == 0:
+            continue
+        subdata[i] = subdata[i] - first_vec
+
+    subdata.pop(0)
+
+    return subdata
+
+
+def norm_2(subdata):
+    first_vec = subdata[0]
+    for i, vec in enumerate(subdata):
+        if i == 0:
+            continue
+        subdata[i] = subdata[i] - first_vec
+    subdata.pop(0)
+
+    for i, vec in enumerate(subdata):
+        if i == 0:
+            max_x = np.max(vec[::2])
+            max_y = np.max(vec[1::2])
+            min_x = np.min(vec[::2])
+            min_y = np.min(vec[1::2])
+        else:
+            if max_x > np.max(vec[::2]):
+                max_x = np.max(vec[::2])
+            if max_y > np.max(vec[1::2]):
+                max_y = np.max(vec[1::2])
+            if min_x < np.min(vec[::2]):
+                min_x = np.min(vec[::2])
+            if min_y < np.min(vec[1::2]):
+                min_y = np.min(vec[1::2])
+
+    std_x = max_x - min_x
+    std_y = max_y - min_y
+
+    for i in range(len(subdata)):
+        subdata[i][::2] /= std_x
+        subdata[i][1::2] /= std_y
+
+    return subdata
+
 class Gesture:
-    def __init__(self, frames=list()):
+    def __init__(self, frames=None):
+        if frames is None:
+            frames = list()
         self._data = frames
 
         self.norm_dict = {
-        "no_normalization" : no_normalization,
-        "bug" : norm_with_bug
+        "norm_0": norm_0,
+        "norm_1": norm_1,
+        "norm_2": norm_2,
+        "bug": norm_bug
         }
 
     def parse_line(self, line):
@@ -37,11 +89,14 @@ class Gesture:
     def __len__(self):
         return len(self._data)
 
-    def data(self, i=None, j=None, norm_name = "bug"):
+    def data(self, i=None, j=None, norm_name="bug"):
         norm = self.norm_dict.get(norm_name)
+
         if norm is None:
             print("ERROR: bad normalization name.")
+
         assert i != None or j != None, "Bad slice"
+
         if i != None and j != None:
             subdata = self._data[i:j]
         elif i == None:
@@ -49,6 +104,7 @@ class Gesture:
         else:
             subdata = self._data[i:]
         subdata = norm(subdata)
+        
         return np.array(subdata).flatten()
 
     def push(self, frame):
@@ -75,4 +131,3 @@ class Gesture:
             print("ERROR: bug in pretty function")
 
         self._data = answer
-
