@@ -5,7 +5,7 @@ import time
 from multiprocessing import Pool
 
 WINDOW = "Hand Tracking"
-PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
+PALM_MODEL_PATH = "./models/palm_detection_without_custom_op.tflite"
 LANDMARK_MODEL_PATH = "./models/hand_landmark.tflite"
 #LANDMARK_MODEL_PATH = "./models/hand_landmark_3d.tflite"
 ANCHORS_PATH = "./anchors.csv"
