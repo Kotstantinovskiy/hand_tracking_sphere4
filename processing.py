@@ -6,8 +6,8 @@ from multiprocessing import Pool
 
 WINDOW = "Hand Tracking"
 PALM_MODEL_PATH = "./palm_detection_without_custom_op.tflite"
-#LANDMARK_MODEL_PATH = "./hand_landmark.tflite"
-LANDMARK_MODEL_PATH = "./hand_landmark_3d.tflite"
+LANDMARK_MODEL_PATH = "./models/hand_landmark.tflite"
+#LANDMARK_MODEL_PATH = "./models/hand_landmark_3d.tflite"
 ANCHORS_PATH = "./anchors.csv"
 PATH = "./data/"
 
@@ -36,8 +36,8 @@ def process_dir(args):
             points, bbox = detector(image)
 
             if points is not None:
-                for p in points:
-                    output_file.write(str(p[0]) + " " + str(p[1]) + " ")
+                for point in points:
+                    output_file.write(str(point[0]) + " " + str(point[1]) + " ")
 
         output_file.write("\n")
     print('%d (%d)' % (num_dir, time.time() - t1))
