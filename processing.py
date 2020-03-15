@@ -1,7 +1,4 @@
-import csv
 import cv2
-import numpy as np
-import tensorflow as tf
 import os
 from hand_tracker import HandTracker
 import time
@@ -27,13 +24,14 @@ labeles_file = open("labeles.csv", "r")
 for line in labeles_file:
     labeles[line.split("\t")[0]] = line.split("\t")[1].strip()
 
+
 def process_dir(args):
     t1 = time.time()
     num_dir, name_dir = args
     with open("./outputs/output%d.txt" % num_dir, "w") as output_file:
         output_file.write(name_dir + "\t" + labeles[name_dir] + "\t" + str(len(os.listdir(PATH + name_dir))) + "\t")
 
-        for name_file in os.listdir(PATH + name_dir):
+        for name_file in list(sorted(os.listdir(PATH + name_dir))):
             image = cv2.imread(PATH + name_dir + "/" + name_file, flags=cv2.IMREAD_COLOR)
             points, bbox = detector(image)
 
@@ -43,6 +41,7 @@ def process_dir(args):
 
         output_file.write("\n")
     print('%d (%d)' % (num_dir, time.time() - t1))
+
 
 dirs = list(enumerate(os.listdir(PATH)))
 p = Pool(36)
