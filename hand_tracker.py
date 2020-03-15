@@ -4,7 +4,8 @@ import numpy as np
 import tensorflow as tf
 from scipy.special import expit
 
-class HandTracker():
+
+class HandTracker:
 
     def __init__(self, palm_model, joint_model, anchors_path,
                 box_enlarge=1.5, box_shift=0.2):
@@ -31,7 +32,7 @@ class HandTracker():
         self.in_idx_joint = self.interp_joint.get_input_details()[0]['index']
         self.out_idx_joint = self.interp_joint.get_output_details()[0]['index']
 
-        self.R90 = np.r_[[[0,1],[-1,0]]]
+        self.R90 = np.r_[[[0, 1], [-1, 0]]]
 
         self._target_triangle = np.float32([
                         [128, 128],
@@ -59,7 +60,7 @@ class HandTracker():
             [source[1] + source[0] - source[2]],
             [3 * source[0] - source[1] - source[2]],
             [source[2] - source[1] + source[0]],
-        ].reshape(-1,2)
+        ].reshape(-1, 2)
         return bbox
 
     @staticmethod
@@ -68,7 +69,6 @@ class HandTracker():
 
     @staticmethod
     def _sigm(x):
-        #return 1 / (1 + np.exp(-x))
         return expit(x)
 
     @staticmethod
@@ -76,26 +76,21 @@ class HandTracker():
         return np.pad(x, ((0, 0), (0, 1)), constant_values=1, mode='constant')
 
     def predict_joints(self, img_norm):
-        self.interp_joint.set_tensor(self.in_idx_joint, img_norm.reshape(1,256,256,3))
+        self.interp_joint.set_tensor(self.in_idx_joint, img_norm.reshape(1, 256, 256, 3))
         self.interp_joint.invoke()
 
         joints = self.interp_joint.get_tensor(self.out_idx_joint)
-        #return joints.reshape(-1,2)
-        return joints.reshape(-1, 3)
+
+        return joints.reshape(-1, 2)
+        #return joints.reshape(-1, 3)
 
     def detect_hand(self, img_norm):
-        """
-        assert -1 <= img_norm.min() and img_norm.max() <= 1,\
-        "img_norm should be in range [-1, 1]"
-        assert img_norm.shape == (256, 256, 3),\
-        "img_norm shape must be (256, 256, 3)"
-        """
         # predict hand location and 7 initial landmarks
         self.interp_palm.set_tensor(self.in_idx, img_norm[None])
         self.interp_palm.invoke()
 
         out_reg = self.interp_palm.get_tensor(self.out_reg_idx)[0]
-        out_clf = self.interp_palm.get_tensor(self.out_clf_idx)[0,:,0]
+        out_clf = self.interp_palm.get_tensor(self.out_clf_idx)[0, :, 0]
 
         # TODO: implement non-max suppression
         detecion_mask = self._sigm(out_clf) > 0.7
@@ -108,11 +103,11 @@ class HandTracker():
         max_idx = np.argmax(candidate_detect[:, 3])
 
         dx, dy, w, h = candidate_detect[max_idx, :4]
-        center_wo_offst = candidate_anchors[max_idx,:2] * 256
+        center_wo_offst = candidate_anchors[max_idx, :2] * 256
 
         # 7 initial keypoints
-        keypoints = center_wo_offst + candidate_detect[max_idx,4:].reshape(-1,2)
-        side = max(w,h) * self.box_enlarge
+        keypoints = center_wo_offst + candidate_detect[max_idx, 4:].reshape(-1, 2)
+        side = max(w, h) * self.box_enlarge
 
         source = self._get_triangle(keypoints[0], keypoints[2], side)
         source -= (keypoints[0] - keypoints[2]) * self.box_shift
@@ -121,10 +116,8 @@ class HandTracker():
     def preprocess_img(self, img):
         shape = np.r_[img.shape]
         pad = (shape.max() - shape[:2]).astype('uint32') // 2
-        img_pad = np.pad(
-            img,
-            ((pad[0],pad[0]), (pad[1],pad[1]), (0,0)),
-            mode='constant')
+        img_pad = np.pad(img, ((pad[0], pad[0]), (pad[1], pad[1]), (0, 0)), mode='constant')
+
         img_small = cv2.resize(img_pad, (256, 256))
         img_small = np.ascontiguousarray(img_small)
 
@@ -139,24 +132,19 @@ class HandTracker():
             return None, None
 
         scale = max(img.shape) / 256
-        Mtr = cv2.getAffineTransform(
-            source * scale,
-            self._target_triangle
-        )
+        Mtr = cv2.getAffineTransform(source * scale, self._target_triangle)
 
-        img_landmark = cv2.warpAffine(
-            self._im_normalize(img_pad), Mtr, (256, 256)
-        )
+        img_landmark = cv2.warpAffine(self._im_normalize(img_pad), Mtr, (256, 256))
 
         joints = self.predict_joints(img_landmark)
 
         Mtr = self._pad1(Mtr.T).T
-        Mtr[2,:2] = 0
+        Mtr[2, :2] = 0
 
         Minv = np.linalg.inv(Mtr)
 
-        kp_orig = (self._pad1(joints[:, :2]) @ Minv.T)[:,:2]
-        box_orig = (self._target_box @ Minv.T)[:,:2]
+        kp_orig = (self._pad1(joints[:, :2]) @ Minv.T)[:, :2]
+        box_orig = (self._target_box @ Minv.T)[:, :2]
         kp_orig -= pad[::-1]
         box_orig -= pad[::-1]
 
