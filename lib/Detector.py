@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import numpy as np
 
+import torch
 from torch import nn
 from torch import optim
 
@@ -31,6 +32,13 @@ class NeuroDetector(nn.Module):
         x5 = self.layer_final(x4)
         x5 = x5.view(-1, 2)
         return self.act_final(x5)
+
+    def predict(self, x):
+        x_tensor = torch.from_numpy(x)
+        with torch.no_grad():
+            y = self(x_tensor).numpy()
+        logits = np.argmax(y, axis=1)
+        return logits
 
 
 class Detector:
@@ -91,12 +99,14 @@ class Detector:
             self.detector.fit(X_train, y_train)
         elif self.type_model == 'neuro':
             loss_fn = nn.CrossEntropyLoss()
-            test_tensor = torch.from_numpy(X_test)
-            test_target = torch.from_numpy(y_test, dtype=torch.long).view(-1)
+            test_tensor = torch.from_numpy(X_test).view(-1, 1, self.window*42).float()
+            test_target = torch.from_numpy(y_test).view(-1).long()
             for iter in range(self.iterations):
+                avg_train_loss = 0
+                avg_test_loss = 0
                 for sample, target in zip(X_train, y_train):
                     self.optimizer.zero_grad()
-                    sample_tensor = torch.from_numpy(sample).view(1, 1, self.window*42)
+                    sample_tensor = torch.from_numpy(sample).view(1, 1, self.window*42).float()
                     target_tensor = torch.tensor([0], dtype=torch.long)
                     if target:
                         target_tensor[0] = 1
@@ -108,7 +118,9 @@ class Detector:
                     with torch.no_grad():
                         test_predict = self.detector(test_tensor)
                         test_loss = loss_fn(test_predict, test_target).item()
-                        print('Iteration: %d, Train loss: %f, Test loss: %f' % (iter, train_loss, test_loss))
+                    avg_train_loss += train_loss
+                    avg_test_loss += test_loss
+                print('Iteration: %d, Train loss: %f, Test loss: %f' % (iter, avg_train_loss/len(X_train), avg_test_loss/len(X_train)))
 
         return X_train, X_test, y_train, y_test
 
