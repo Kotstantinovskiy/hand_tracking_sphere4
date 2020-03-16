@@ -80,7 +80,7 @@ class Gesture:
         self.label = splited[1]
         self._data = list()
 
-        landmarks = list(map(float, splited[3].split(" ")[:-1]))
+        landmarks = list(map(float, splited[3].split(" ")))
 
         assert len(landmarks) % 42 == 0, "Bad gesture shape"
         for l in range(42, len(landmarks)+1, 42):
@@ -104,7 +104,7 @@ class Gesture:
         else:
             subdata = self._data[i:]
         subdata = norm(subdata)
-        
+
         return np.array(subdata).flatten()
 
     def push(self, frame):
