@@ -52,7 +52,7 @@ class Detector:
         print("Start train model on %d samples" % X.shape[0])
         if self.type_model == "catboost":
             self.detector.fit(X_train, y_train, eval_set=Pool(X_test, y_test))
-        elif self.type_model == "logistic_regression":
+        elif self.type_model == "logistic_reg":
             self.detector.fit(X_train, y_train)
 
         return X_train, X_test, y_train, y_test
