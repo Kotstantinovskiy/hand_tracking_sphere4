@@ -8,40 +8,21 @@ def norm_0(subdata):
     return normed
 
 
-def norm_bug(subdata):
-    zero_min = np.min(subdata[0])
-    zero_std = np.max(subdata[0]) - zero_min
-    subdata[0] -= zero_min
-    subdata[0] /= zero_std
+def norm_1(subdata):
+    first_vec = subdata[0]
     normed = []
     for i, vec in enumerate(subdata):
         if i == 0:
             continue
-        subdata[i] = (vec - subdata[i - 1]) / zero_std
-    return subdata
+        normed.append((subdata[i] - first_vec).copy())
 
-
-def norm_1(subdata):
-    first_vec = subdata[0]
-    for i, vec in enumerate(subdata):
-        if i == 0:
-            continue
-        subdata[i] = subdata[i] - first_vec
-
-    subdata.pop(0)
-
-    return subdata
+    return normed
 
 
 def norm_2(subdata):
-    first_vec = subdata[0]
-    for i, vec in enumerate(subdata):
-        if i == 0:
-            continue
-        subdata[i] = subdata[i] - first_vec
-    subdata.pop(0)
+    normed = norm_1(subdata)
 
-    for i, vec in enumerate(subdata):
+    for i, vec in enumerate(normed):
         if i == 0:
             max_x = np.max(vec[::2])
             max_y = np.max(vec[1::2])
@@ -60,61 +41,59 @@ def norm_2(subdata):
     std_x = max_x - min_x
     std_y = max_y - min_y
 
-    for i in range(len(subdata)):
-        subdata[i][::2] /= std_x
-        subdata[i][1::2] /= std_y
+    for i in range(len(normed)):
+        normed[i][::2] /= std_x
+        normed[i][1::2] /= std_y
 
-    return subdata
+    return normed
 
 def norm_delta(subdata):
     zero_min = np.min(subdata[0])
     zero_std = np.max(subdata[0]) - zero_min
-    subdata[0] -= zero_min
-    subdata[0] /= zero_std
-    tmp = subdata[0].copy()
+    normed = [subdata[0].copy()]
+    normed[0] -= zero_min
+    normed[0] /= zero_std
     for i, vec in enumerate(subdata):
         if i == 0:
             continue
-        _ = subdata[i].copy()
-        subdata[i] = (vec - tmp) / zero_std
-        tmp = _
-    return subdata
+        normed.append(((vec - subdata[i - 1]) / zero_std).copy())
+    return normed
 
 def norm_split_delta(subdata):
     zero_minx = np.min(subdata[0][::2])
     zero_miny = np.min(subdata[0][1::2])
     zero_stdx = np.max(subdata[0][::2]) - zero_minx
     zero_stdy = np.max(subdata[0][1::2]) - zero_miny
-    subdata[0][::2] -= zero_minx
-    subdata[0][1::2] -= zero_miny
-    subdata[0][::2] /= zero_stdx
-    subdata[0][1::2] /= zero_stdy
-    tmp = subdata[0].copy()
+    normed = [subdata[0].copy()]
+    normed[0][::2] -= zero_minx
+    normed[0][1::2] -= zero_miny
+    normed[0][::2] /= zero_stdx
+    normed[0][1::2] /= zero_stdy
     for i, vec in enumerate(subdata):
         if i == 0:
             continue
-        _ = subdata[i].copy()
-        subdata[i][::2] = (vec[::2] - tmp[::2]) / zero_stdx
-        subdata[i][1::2] = (vec[1::2] - tmp[1::2]) / zero_stdy
-        tmp = _
-    return subdata
+        normed.append(vec.copy())
+        normed[i][::2] = (normed[i][::2] - subdata[i - 1][::2]) / zero_stdx
+        normed[i][1::2] = (normed[i][1::2] - subdata[i - 1][1::2]) / zero_stdy
+    return normed
 
 def norm_split(subdata):
     zero_minx = np.min(subdata[0][::2])
     zero_miny = np.min(subdata[0][1::2])
     zero_stdx = np.max(subdata[0][::2]) - zero_minx
     zero_stdy = np.max(subdata[0][1::2]) - zero_miny
-    subdata[0][::2] -= zero_minx
-    subdata[0][1::2] -= zero_miny
-    subdata[0][::2] /= zero_stdx
-    subdata[0][1::2] /= zero_stdy
-    tmp = subdata[0].copy()
+    normed = [subdata[0].copy()]
+    normed[0][::2] -= zero_minx
+    normed[0][1::2] -= zero_miny
+    normed[0][::2] /= zero_stdx
+    normed[0][1::2] /= zero_stdy
     for i, vec in enumerate(subdata):
         if i == 0:
             continue
-        subdata[i][::2] = (vec[::2] - zero_minx) / zero_stdx
-        subdata[i][1::2] = (vec[1::2] - zero_miny) / zero_stdy
-    return subdata
+        normed.append(vec.copy())
+        normed[i][::2] = (normed[i][::2] - zero_minx) / zero_stdx
+        normed[i][1::2] = (normed[i][1::2] - zero_miny) / zero_stdy
+    return normed
 
 class Gesture:
     def __init__(self, frames=None):
@@ -160,9 +139,9 @@ class Gesture:
             subdata = self._data[:j]
         else:
             subdata = self._data[i:]
-        subdata = norm(subdata)
+        normed = norm(subdata)
 
-        return np.array(subdata).flatten()
+        return np.array(normed).flatten()
 
     def push(self, frame):
         assert len(frame) == 42, "Bad frame shape"
