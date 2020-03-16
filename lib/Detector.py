@@ -2,10 +2,13 @@ from catboost import CatBoostClassifier, Pool
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import numpy as np
+import numpy.random as npr
+from tqdm import tqdm
 
 import torch
 from torch import nn
 from torch import optim
+
 
 class NeuroDetector(nn.Module):
     def __init__(self, window=8, frame_size=42, in_channels=1):
@@ -65,7 +68,7 @@ class Detector:
         X = list()
         y = list()
 
-        for j, gesture in enumerate(gestures):
+        for j, gesture in tqdm(enumerate(gestures), desc='Loading dataset'):
 
             if len(gesture) < self.window:
                 continue
@@ -84,34 +87,36 @@ class Detector:
                         y.append(1)
                 else:
                     y.append(0)
-            print('%d/%d' % (j, len(gestures)), end='\r')
 
         X = np.concatenate(X, axis=0)
         y = np.array(y)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True)
 
-        ##train Catboost
         print("Start train model on %d samples" % X.shape[0])
         if self.type_model == "catboost":
             self.detector.fit(X_train, y_train, eval_set=Pool(X_test, y_test))
         elif self.type_model == "logistic_reg":
             self.detector.fit(X_train, y_train)
         elif self.type_model == 'neuro':
+            self.detector.cuda()
             loss_fn = nn.CrossEntropyLoss()
-            test_tensor = torch.from_numpy(X_test).view(-1, 1, self.window*42).float()
-            test_target = torch.from_numpy(y_test).view(-1).long()
+            test_tensor = torch.from_numpy(X_test).view(-1, 1, self.window*42).float().cuda()
+            test_target = torch.from_numpy(y_test).view(-1).long().cuda()
+            train_tensor = torch.from_numpy(X_train).view(-1, 1, self.window*42).float().cuda()
+            train_target = torch.from_numpy(y_train).view(-1).long().cuda()
+            order = np.arange(len(train_target))
             for iter in range(self.iterations):
                 avg_train_loss = 0
                 avg_test_loss = 0
-                for sample, target in zip(X_train, y_train):
+                npr.shuffle(order)
+                for sample_id in tqdm(order, desc='Iteration %d' % (iter + 1)):
+                    sample = train_tensor[sample_id, :, :]
+                    target = train_target[sample_id]
+                #for sample, target in tqdm(zip(train_tensor, train_target), desc='Iteration %d' % (iter + 1)):
                     self.optimizer.zero_grad()
-                    sample_tensor = torch.from_numpy(sample).view(1, 1, self.window*42).float()
-                    target_tensor = torch.tensor([0], dtype=torch.long)
-                    if target:
-                        target_tensor[0] = 1
-                    predict_tensor = self.detector(sample_tensor)
-                    loss = loss_fn(predict_tensor, target_tensor)
+                    predict_tensor = self.detector(sample.view(1, 1, -1))
+                    loss = loss_fn(predict_tensor, target.view(1))
                     train_loss = loss.item()
                     loss.backward()
                     self.optimizer.step()
@@ -120,7 +125,8 @@ class Detector:
                         test_loss = loss_fn(test_predict, test_target).item()
                     avg_train_loss += train_loss
                     avg_test_loss += test_loss
-                print('Iteration: %d, Train loss: %f, Test loss: %f' % (iter, avg_train_loss/len(X_train), avg_test_loss/len(X_train)))
+                print('\nIteration: %d, Train loss: %f, Test loss: %f' % (iter + 1, avg_train_loss/len(X_train), avg_test_loss/len(X_train)))
+            self.detector.cpu()
 
         return X_train, X_test, y_train, y_test
 
