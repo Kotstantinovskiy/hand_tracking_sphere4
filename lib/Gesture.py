@@ -105,7 +105,6 @@ class Gesture:
         "norm_0": norm_0,
         "norm_1": norm_1,
         "norm_2": norm_2,
-        "bug": norm_bug,
         "delta": norm_delta,
         "split_delta": norm_split_delta,
         "split": norm_split
