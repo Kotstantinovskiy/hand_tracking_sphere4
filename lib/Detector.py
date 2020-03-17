@@ -37,7 +37,7 @@ class NeuroDetector(nn.Module):
         return self.act_final(x5)
 
     def predict(self, x):
-        x_tensor = torch.from_numpy(x)
+        x_tensor = torch.from_numpy(x).view(-1, 1, self.frame_size*self.window).float()
         with torch.no_grad():
             y = self(x_tensor).numpy()
         logits = np.argmax(y, axis=1)
@@ -55,7 +55,7 @@ class Detector:
             self.detector = LogisticRegression(max_iter=iterations,
                                                verbose=1)
         elif type_model == 'neuro':
-            self.detector = NeuroDetector(window=window)
+            self.detector = NeuroDetector(window=window, in_channels=3)
             self.optimizer = optim.SGD(self.detector.parameters(),
                                        lr=lr)
 
@@ -77,8 +77,14 @@ class Detector:
                 if i + self.window > len(gesture):
                     break
 
-                g = gesture.data(i, i+self.window)
-                X.append(g.reshape(1, -1))
+                g1 = gesture.data(i, i+self.window, norm='split')
+                g2 = gesture.data(i, i+self.window, norm='split_delta')
+                g3 = gesture.data(i, i+self.window, norm='norm_1')
+                if self.type_model == 'neuro':
+                    g = np.vstack([g1, g2, g3])
+                    X.append(g.reshape(1, 3, -1))
+                else:
+                    X.append(g1.reshape(1, -1))
 
                 if i + self.window == len(gesture):
                     if gesture.label == "No gesture":
@@ -101,9 +107,9 @@ class Detector:
         elif self.type_model == 'neuro':
             self.detector.cuda()
             loss_fn = nn.CrossEntropyLoss()
-            test_tensor = torch.from_numpy(X_test).view(-1, 1, self.window*42).float().cuda()
+            test_tensor = torch.from_numpy(X_test).view(-1, 3, self.window*42).float().cuda()
             test_target = torch.from_numpy(y_test).view(-1).long().cuda()
-            train_tensor = torch.from_numpy(X_train).view(-1, 1, self.window*42).float().cuda()
+            train_tensor = torch.from_numpy(X_train).view(-1, 3, self.window*42).float().cuda()
             train_target = torch.from_numpy(y_train).view(-1).long().cuda()
             order = np.arange(len(train_target))
             for iter in range(self.iterations):
@@ -113,9 +119,8 @@ class Detector:
                 for sample_id in tqdm(order, desc='Iteration %d' % (iter + 1)):
                     sample = train_tensor[sample_id, :, :]
                     target = train_target[sample_id]
-                #for sample, target in tqdm(zip(train_tensor, train_target), desc='Iteration %d' % (iter + 1)):
                     self.optimizer.zero_grad()
-                    predict_tensor = self.detector(sample.view(1, 1, -1))
+                    predict_tensor = self.detector(sample.view(1, 3, -1))
                     loss = loss_fn(predict_tensor, target.view(1))
                     train_loss = loss.item()
                     loss.backward()
