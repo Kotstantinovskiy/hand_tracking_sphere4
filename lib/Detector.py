@@ -72,7 +72,7 @@ class NeuroDetector(nn.Module):
 
 
 class Detector:
-    def __init__(self, window=8, iterations=800, lr=0.1, clip=0.05, depth=8, type_model="catboost"):
+    def __init__(self, window=8, iterations=800, lr=0.1, clip=None, depth=8, type_model="catboost"):
         self.type_model = type_model
         if type_model == "catboost":
             self.detector = CatBoostClassifier(iterations=iterations,
@@ -153,7 +153,8 @@ class Detector:
                     loss = loss_fn(predict_tensor, target.view(-1))
                     train_loss = loss.item()
                     loss.backward()
-                    torch.nn.utils.clip_grad_norm_(self.detector.parameters(), self.clip)
+                    if self.clip:
+                        torch.nn.utils.clip_grad_norm_(self.detector.parameters(), self.clip)
                     self.optimizer.step()
                     with torch.no_grad():
                         test_predict = self.detector(test_tensor)
