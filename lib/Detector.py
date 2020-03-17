@@ -72,7 +72,7 @@ class NeuroDetector(nn.Module):
 
 
 class Detector:
-    def __init__(self, window=8, iterations=800, lr=0.1, depth=8, type_model="catboost"):
+    def __init__(self, window=8, iterations=800, lr=0.1, batch_size=64, depth=8, type_model="catboost"):
         self.type_model = type_model
         if type_model == "catboost":
             self.detector = CatBoostClassifier(iterations=iterations,
@@ -88,6 +88,7 @@ class Detector:
 
         self.window = window
         self.iterations = iterations
+        self.batch_size = batch_size
 
     def train(self, gestures):
         ## processing data
@@ -143,12 +144,13 @@ class Detector:
                 avg_train_loss = 0
                 avg_test_loss = 0
                 npr.shuffle(order)
-                for sample_id in tqdm(order, desc='Iteration %d' % (iter + 1)):
-                    sample = train_tensor[sample_id, :, :]
-                    target = train_target[sample_id]
+                for batch_id in tqdm(range(int(len(order)/self.batch_size)), desc='Iteration %d' % (iter + 1)):
+                    sample_ids = order[batch_id*self.batch_size:(batch_id + 1)*self.batch_size]
+                    batch = train_tensor[sample_ids, :, :]
+                    target = train_target[sample_ids]
                     self.optimizer.zero_grad()
-                    predict_tensor = self.detector(sample.view(1, 3, -1))
-                    loss = loss_fn(predict_tensor, target.view(1))
+                    predict_tensor = self.detector(sample.view(-1, 3, self.window*42))
+                    loss = loss_fn(predict_tensor, target.view(-1))
                     train_loss = loss.item()
                     loss.backward()
                     self.optimizer.step()
