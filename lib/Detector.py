@@ -64,7 +64,7 @@ class NeuroDetector(nn.Module):
         return self.act_final(x11)
 
     def predict(self, x):
-        x_tensor = torch.from_numpy(x).view(-1, 1, self.frame_size*self.window).float()
+        x_tensor = torch.from_numpy(x).view(-1, self.in_channels, self.frame_size*self.window).float()
         with torch.no_grad():
             y = self(x_tensor).numpy()
         logits = np.argmax(y, axis=1)
