@@ -72,7 +72,7 @@ class NeuroDetector(nn.Module):
 
 
 class Detector:
-    def __init__(self, window=8, iterations=800, lr=0.1, batch_size=64, depth=8, type_model="catboost"):
+    def __init__(self, window=8, iterations=800, lr=0.1, depth=8, type_model="catboost"):
         self.type_model = type_model
         if type_model == "catboost":
             self.detector = CatBoostClassifier(iterations=iterations,
@@ -88,9 +88,8 @@ class Detector:
 
         self.window = window
         self.iterations = iterations
-        self.batch_size = batch_size
 
-    def train(self, gestures):
+    def train(self, gestures, batch_size=64):
         ## processing data
         print("Start processing data")
         X = list()
@@ -144,8 +143,8 @@ class Detector:
                 avg_train_loss = 0
                 avg_test_loss = 0
                 npr.shuffle(order)
-                for batch_id in tqdm(range(int(len(order)/self.batch_size)), desc='Iteration %d' % (iter + 1)):
-                    sample_ids = order[batch_id*self.batch_size:(batch_id + 1)*self.batch_size]
+                for batch_id in tqdm(range(int(len(order)/batch_size)), desc='Iteration %d' % (iter + 1)):
+                    sample_ids = order[batch_id*batch_size:(batch_id + 1)*batch_size]
                     batch = train_tensor[sample_ids, :, :]
                     target = train_target[sample_ids]
                     self.optimizer.zero_grad()
@@ -159,7 +158,7 @@ class Detector:
                         test_loss = loss_fn(test_predict, test_target).item()
                     avg_train_loss += train_loss
                     avg_test_loss += test_loss
-                print('\nIteration: %d, Train loss: %f, Test loss: %f' % (iter + 1, avg_train_loss*self.batch_size/len(X_train), avg_test_loss*self.batch_size/len(X_train)))
+                print('\nIteration: %d, Train loss: %f, Test loss: %f' % (iter + 1, avg_train_loss*batch_size/len(X_train), avg_test_loss*batch_size/len(X_train)))
             self.detector.cpu()
 
         return X_train, X_test, y_train, y_test
