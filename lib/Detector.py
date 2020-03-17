@@ -149,7 +149,7 @@ class Detector:
                     batch = train_tensor[sample_ids, :, :]
                     target = train_target[sample_ids]
                     self.optimizer.zero_grad()
-                    predict_tensor = self.detector(sample.view(-1, 3, self.window*42))
+                    predict_tensor = self.detector(batch.view(-1, 3, self.window*42))
                     loss = loss_fn(predict_tensor, target.view(-1))
                     train_loss = loss.item()
                     loss.backward()
@@ -159,7 +159,7 @@ class Detector:
                         test_loss = loss_fn(test_predict, test_target).item()
                     avg_train_loss += train_loss
                     avg_test_loss += test_loss
-                print('\nIteration: %d, Train loss: %f, Test loss: %f' % (iter + 1, avg_train_loss/len(X_train), avg_test_loss/len(X_train)))
+                print('\nIteration: %d, Train loss: %f, Test loss: %f' % (iter + 1, avg_train_loss*self.batch_size/len(X_train), avg_test_loss*self.batch_size/len(X_train)))
             self.detector.cpu()
 
         return X_train, X_test, y_train, y_test
