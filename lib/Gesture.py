@@ -10,7 +10,7 @@ def norm_0(subdata):
 
 def norm_1(subdata):
     first_vec = subdata[0]
-    normed = []
+    normed = [first_vec.copy()]
     for i, vec in enumerate(subdata):
         if i == 0:
             continue
