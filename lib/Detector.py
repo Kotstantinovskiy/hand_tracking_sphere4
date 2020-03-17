@@ -83,7 +83,7 @@ class Detector:
                                                verbose=1)
         elif type_model == 'neuro':
             self.detector = NeuroDetector(window=window, in_channels=3)
-            self.optimizer = optim.SGD(self.detector.parameters(),
+            self.optimizer = optim.Adam(self.detector.parameters(),
                                        lr=lr)
 
         self.window = window
