@@ -77,9 +77,9 @@ class Detector:
                 if i + self.window > len(gesture):
                     break
 
-                g1 = gesture.data(i, i+self.window, norm='split')
-                g2 = gesture.data(i, i+self.window, norm='split_delta')
-                g3 = gesture.data(i, i+self.window, norm='norm_1')
+                g1 = gesture.data(i, i+self.window, norm_name='split')
+                g2 = gesture.data(i, i+self.window, norm_name='split_delta')
+                g3 = gesture.data(i, i+self.window, norm_name='norm_1')
                 if self.type_model == 'neuro':
                     g = np.vstack([g1, g2, g3])
                     X.append(g.reshape(1, 3, -1))
